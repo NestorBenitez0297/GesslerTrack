@@ -20,10 +20,11 @@ function semilla() {
 }
 
 let P = repo.cargar(semilla);
-let view = "team", fc = "", fe = "", fp = "", sel = null, adding = false, errores = [], erroresPago = [];
+let rol = "gestor", view = "team", fc = "", fe = "", fp = "", sel = null, adding = false, errores = [], erroresPago = [];
 const $ = s => document.querySelector(s);
 const fd = t => (typeof t === "number" ? new Date(t).toLocaleDateString("es-CO", { day: "2-digit", month: "short" }) : esc(t));
 const guardar = () => repo.guardar(P);
+const ok = a => L.puede(rol, a);
 const avisos = e => (e.length ? `<div class="err" role="alert">${e.map(m => `<div>${esc(m)}</div>`).join("")}</div>` : "");
 
 function row(p) {
@@ -31,7 +32,7 @@ function row(p) {
   return `<div class="row ${due ? "due" : ""}" data-id="${p.id}"><div><h3>${esc(p.cli)}</h3><small>${esc(p.pro)}</small></div>
 <div><span class="badge b-${p.est}">${EST[p.est]}</span><br><small>${esc(p.ciu)}</small></div>
 <div><small>Entrega</small><br><b>${fd(p.due)}</b>${due ? ` <span class="badge b-riesgo">${d < 0 ? "vencido" : d + " d"}</span>` : ""}</div>
-<div><small>Pagado ${cop(L.pagado(p))} de ${cop(p.tot)}</small><div class="prog"><i style="width:${pc}%"></i></div></div></div>`;
+<div>${ok("ver_pagos") ? `<small>Pagado ${cop(L.pagado(p))} de ${cop(p.tot)}</small><div class="prog"><i style="width:${pc}%"></i></div>` : `<small>Responsable</small><br><b>${esc(p.res)}</b>`}</div></div>`;
 }
 
 function team() {
@@ -39,14 +40,14 @@ function team() {
   const list = L.filtrar(P, { ciudad: fc, estado: fe, pago: fp });
   const ciu = [...new Set(P.map(p => p.ciu))];
   return `<section class="kpis"><div class="kpi"><span>Proyectos activos</span><b>${k.activos}</b></div>
-<div class="kpi al"><span>Pagos pendientes</span><b>${cop(k.pendiente)}</b></div>
+${ok("ver_pagos") ? `<div class="kpi al"><span>Pagos pendientes</span><b>${cop(k.pendiente)}</b></div>` : ""}
 <div class="kpi al"><span>Próximos a vencer (≤${L.DIAS_ALERTA} días)</span><b>${k.porVencer}</b></div></section>
 <div class="bar"><select id="fc" aria-label="Ciudad"><option value="">Todas las ciudades</option>${ciu.map(c => `<option value="${esc(c)}" ${c === fc ? "selected" : ""}>${esc(c)}</option>`).join("")}</select>
 <select id="fe" aria-label="Estado"><option value="">Todos los estados</option>${Object.keys(EST).map(k => `<option value="${k}" ${k === fe ? "selected" : ""}>${EST[k]}</option>`).join("")}</select>
-<select id="fp" aria-label="Pago"><option value="">Todos los pagos</option><option value="pend" ${fp === "pend" ? "selected" : ""}>Con saldo pendiente</option><option value="ok" ${fp === "ok" ? "selected" : ""}>Pagados al 100%</option></select>
-<span class="sp"></span><button class="btn sec" id="rst" title="Borra los cambios guardados y recarga los datos de demostración">Restablecer demo</button><button class="btn" id="add">+ Nuevo proyecto</button></div>
+${ok("ver_pagos") ? `<select id="fp" aria-label="Pago"><option value="">Todos los pagos</option><option value="pend" ${fp === "pend" ? "selected" : ""}>Con saldo pendiente</option><option value="ok" ${fp === "ok" ? "selected" : ""}>Pagados al 100%</option></select>` : ""}
+<span class="sp"></span>${ok("crear_proyecto") ? `<button class="btn sec" id="rst" title="Borra los cambios guardados y recarga los datos de demostración">Restablecer demo</button><button class="btn" id="add">+ Nuevo proyecto</button>` : ""}</div>
 <div class="list">${list.map(row).join("") || '<p class="note">Sin resultados para este filtro.</p>'}</div>
-${adding ? form() : ""}${sel ? detail(P.find(p => p.id === sel)) : ""}`;
+${adding && ok("crear_proyecto") ? form() : ""}${sel ? detail(P.find(p => p.id === sel)) : ""}`;
 }
 
 function detail(p) {
@@ -54,9 +55,9 @@ function detail(p) {
 <div class="g2"><label>Estado<select id="se">${Object.keys(EST).map(k => `<option value="${k}" ${k === p.est ? "selected" : ""}>${EST[k]}</option>`).join("")}</select></label>
 <label>Comentario del cambio<input id="sc" placeholder="Ej.: cliente aprobó diseño"></label></div>
 <div><button class="btn" id="sg">Guardar cambio</button> <button class="btn sec" id="cl">Cerrar</button></div>
-${avisos(erroresPago)}<div class="g2"><label>Registrar pago (COP)<input id="pm" type="number" min="1" placeholder="Monto"></label><label>Concepto<input id="pc" placeholder="Ej.: Abono 2"></label></div>
-<div><button class="btn" id="pg">Registrar pago</button></div>
-<h3>Historial de pagos</h3>${hist(p)}<h3>Bitácora de cambios</h3>
+${ok("registrar_pago") ? `${avisos(erroresPago)}<div class="g2"><label>Registrar pago (COP)<input id="pm" type="number" min="1" placeholder="Monto"></label><label>Concepto<input id="pc" placeholder="Ej.: Abono 2"></label></div>
+<div><button class="btn" id="pg">Registrar pago</button></div>` : ""}
+${ok("ver_pagos") ? `<h3>Historial de pagos</h3>${hist(p)}` : ""}<h3>Bitácora de cambios</h3>
 <table>${p.log.map(l => `<tr><td>${esc(l[0])}</td><td>${fd(l[1])}</td></tr>`).join("")}</table></section>`;
 }
 
@@ -80,6 +81,11 @@ function client() {
 }
 
 function render() {
+  // Control de acceso por rol: la vista se ajusta a los permisos del rol activo.
+  if (view === "team" && !ok("ver_equipo")) view = "client";
+  if (view === "client" && !ok("ver_cliente")) view = "team";
+  $("#vTeam").hidden = !ok("ver_equipo");
+  $("#vClient").hidden = !ok("ver_cliente");
   $("#app").innerHTML = view === "team" ? team() : client();
   $("#vTeam").className = view === "team" ? "on" : "";
   $("#vClient").className = view === "client" ? "on" : "";
@@ -87,29 +93,30 @@ function render() {
 }
 
 function bind() {
-  const g = s => $(s);
+  const g = s => $(s), on = (s, ev, fn) => { if (g(s)) g(s)[ev] = fn; };
   document.querySelectorAll(".row").forEach(r => r.onclick = () => { sel = +r.dataset.id; adding = false; erroresPago = []; render(); $("#det").scrollIntoView({ behavior: "smooth" }); });
-  if (g("#fc")) {
-    g("#fc").onchange = e => { fc = e.target.value; render(); };
-    g("#fe").onchange = e => { fe = e.target.value; render(); };
-    g("#fp").onchange = e => { fp = e.target.value; render(); };
-    g("#add").onclick = () => { adding = true; sel = null; errores = []; render(); };
-    g("#rst").onclick = () => { repo.reiniciar(); P = repo.cargar(semilla); sel = null; adding = false; render(); };
-  }
-  if (g("#sg")) g("#sg").onclick = () => {
+  on("#fc", "onchange", e => { fc = e.target.value; render(); });
+  on("#fe", "onchange", e => { fe = e.target.value; render(); });
+  on("#fp", "onchange", e => { fp = e.target.value; render(); });
+  on("#add", "onclick", () => { adding = true; sel = null; errores = []; render(); });
+  on("#rst", "onclick", () => { repo.reiniciar(); P = repo.cargar(semilla); sel = null; adding = false; render(); });
+  on("#sg", "onclick", () => {
+    if (!ok("cambiar_estado")) return;
     const p = P.find(x => x.id === sel), n = g("#se").value;
     if (L.validarEstado(n).length || n === p.est) return;
     L.cambiarEstado(p, n, g("#sc").value.trim(), Date.now()); guardar(); render();
-  };
-  if (g("#pg")) g("#pg").onclick = () => {
+  });
+  on("#pg", "onclick", () => {
+    if (!ok("registrar_pago")) return;
     const p = P.find(x => x.id === sel), m = +g("#pm").value;
     erroresPago = L.validarPago(p, m);
     if (!erroresPago.length) { L.registrarPago(p, g("#pc").value.trim(), m, Date.now()); guardar(); }
     render();
-  };
-  if (g("#cl")) g("#cl").onclick = () => { sel = null; render(); };
-  if (g("#nx")) g("#nx").onclick = () => { adding = false; errores = []; render(); };
-  if (g("#ns")) g("#ns").onclick = () => {
+  });
+  on("#cl", "onclick", () => { sel = null; render(); });
+  on("#nx", "onclick", () => { adding = false; errores = []; render(); });
+  on("#ns", "onclick", () => {
+    if (!ok("crear_proyecto")) return;
     const d = { cliente: g("#nc").value, ciudad: g("#nu").value, descripcion: g("#np").value, entrega: g("#nf").value, total: +g("#nt").value || 0, anticipo: +g("#na").value || 0 };
     errores = L.validarProyecto(d);
     if (errores.length) {
@@ -118,10 +125,14 @@ function bind() {
     }
     const id = Math.max(0, ...P.map(p => p.id)) + 1;
     P.unshift(L.crearProyecto(d, id, Date.now())); guardar(); adding = false; render();
-  };
+  });
 }
 
 $("#vTeam").onclick = () => { view = "team"; render(); };
 $("#vClient").onclick = () => { view = "client"; render(); };
+$("#rol").onchange = e => { rol = e.target.value; sel = null; adding = false; fp = ok("ver_pagos") ? fp : ""; render(); };
+// Permite abrir la aplicación con un rol inicial: index.html?rol=cliente
+const rolInicial = new URLSearchParams(location.search).get("rol");
+if (L.ROLES[rolInicial]) { rol = rolInicial; $("#rol").value = rol; }
 render();
 })();

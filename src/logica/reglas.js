@@ -11,7 +11,7 @@
   /* Permisos por rol (HU Acceso). */
   const ROLES = { gestor: "Gestor", desarrollador: "Desarrollador", cliente: "Cliente" };
   const PERMISOS = {
-    gestor: ["ver_equipo", "crear_proyecto", "cambiar_estado", "registrar_pago", "ver_pagos"],
+    gestor: ["ver_equipo", "ver_cliente", "crear_proyecto", "cambiar_estado", "registrar_pago", "ver_pagos"],
     desarrollador: ["ver_equipo", "cambiar_estado"],
     cliente: ["ver_cliente", "ver_pagos"]
   };

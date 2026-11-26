@@ -9,7 +9,8 @@
 <body>
 <header>
   <div><h1>Gessler Track</h1><small>Seguimiento de proyectos, pagos y entregas</small></div>
-  <div class="seg" role="tablist"><button id="vTeam" class="on">Vista equipo</button><button id="vClient">Vista cliente</button></div>
+  <div class="bar"><label class="rol">Rol<select id="rol" aria-label="Rol"><option value="gestor">Gestor</option><option value="desarrollador">Desarrollador</option><option value="cliente">Cliente</option></select></label>
+  <div class="seg" role="tablist"><button id="vTeam" class="on">Vista equipo</button><button id="vClient">Vista cliente</button></div></div>
 </header>
 <main id="app"></main>
 <script src="src/logica/reglas.js"></script>
