@@ -1,0 +1,11 @@
+#!/bin/sh
+# Valida la nomenclatura de commits: GESTR-<funcionalidad>: <descripcion>
+msg=$(head -n1 "$1")
+case "$msg" in Merge*|Revert*|fixup!*|squash!*) exit 0 ;; esac
+if ! printf '%s' "$msg" | grep -Eq '^GESTR-[a-z0-9]+(-[a-z0-9]+)*: .+'; then
+  echo "ERROR: el mensaje de commit no cumple la nomenclatura."
+  echo "  Formato:  GESTR-<funcionalidad>: <descripcion>"
+  echo "  Ejemplo:  GESTR-pagos: agrega registro de abonos"
+  echo "  Recibido: $msg"
+  exit 1
+fi
