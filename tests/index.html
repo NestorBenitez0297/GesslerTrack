@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gessler Track — Pruebas</title>
+<style>
+body{margin:0;background:#f4f6fa;color:#1f2937;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{background:#2e4057;color:#fff;padding:14px 20px}header h1{margin:0;font-size:20px}header small{opacity:.8}
+main{max-width:1150px;margin:0 auto;padding:18px}
+.res{display:flex;gap:12px;margin-bottom:14px}.res div{background:#fff;border:1px solid #e5e7eb;border-radius:10px;padding:10px 16px}
+.res b{display:block;font-size:22px}.ok b{color:#16a34a}.ko b{color:#dc2626}
+table{width:100%;border-collapse:collapse;background:#fff;border:1px solid #e5e7eb;border-radius:10px}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #e5e7eb;vertical-align:top}th{background:#eef2f7}
+.e-Aprobado{color:#16a34a;font-weight:600}.e-Fallido{color:#dc2626;font-weight:600}
+</style>
+</head>
+<body>
+<header><h1>Gessler Track — Casos de prueba</h1><small>Pruebas funcionales de las capas de lógica y persistencia, por historia de usuario</small></header>
+<main id="out"></main>
+<script src="../src/logica/reglas.js"></script>
+<script src="../src/persistencia/repositorio.js"></script>
+<script src="pruebas.js"></script>
+<script>
+const r = GT.pruebas.ejecutar(), ok = r.filter(x => x.estado === "Aprobado").length, esc = GT.logica.escapar;
+document.getElementById("out").innerHTML =
+  `<div class="res"><div>Ejecutados<b>${r.length}</b></div><div class="ok">Aprobados<b>${ok}</b></div><div class="ko">Fallidos<b>${r.length - ok}</b></div><div>Fecha<b style="font-size:15px">${new Date().toLocaleString("es-CO")}</b></div></div>
+  <table><tr><th>Caso</th><th>Historia</th><th>Pasos</th><th>Resultado esperado</th><th>Estado</th></tr>
+  ${r.map(x => `<tr><td>${x.id}</td><td>${esc(x.historia)}</td><td>${esc(x.pasos)}</td><td>${esc(x.esperado)}${x.estado === "Fallido" ? `<br><small>${esc(x.obtenido)}</small>` : ""}</td><td class="e-${x.estado}">${x.estado}</td></tr>`).join("")}</table>`;
+document.title = `Pruebas: ${ok}/${r.length} aprobadas`;
+</script>
+</body>
+</html>
