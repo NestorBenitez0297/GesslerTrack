@@ -25,7 +25,7 @@ GesslerTrack/
 ├── tests/                           # Casos de prueba por historia de usuario (CP-01 a CP-22)
 ├── assets/img/                      # Imágenes y recursos estáticos
 ├── docs/
-│   ├── Informe-tecnico-Proyecto-Gessler.md / .pdf / .docx
+│   ├── Informe-tecnico-Proyecto-Gessler.md / .docx; «Informe técnico - Proyecto Gessler.pdf»
 │   ├── backlog.md                   # Backlog priorizado y trazabilidad HU → código → prueba
 │   └── img/                         # arquitectura.svg y figuras del informe (img/informe/)
 └── .githooks/commit-msg             # Validación de nomenclatura de commits
@@ -34,6 +34,6 @@ GesslerTrack/
 ![Arquitectura](docs/img/arquitectura.svg)
 
 ## Documentación
-- [Informe técnico - Proyecto Gessler](docs/Informe-tecnico-Proyecto-Gessler.md) ([PDF](docs/Informe-tecnico-Proyecto-Gessler.pdf) · [DOCX](docs/Informe-tecnico-Proyecto-Gessler.docx))
+- [Informe técnico - Proyecto Gessler](docs/Informe-tecnico-Proyecto-Gessler.md) ([PDF](docs/Informe%20t%C3%A9cnico%20-%20Proyecto%20Gessler.pdf) · [DOCX](docs/Informe-tecnico-Proyecto-Gessler.docx))
 - [Backlog y trazabilidad](docs/backlog.md)
 - [Guía de contribución: ramas y commits](CONTRIBUTING.md)

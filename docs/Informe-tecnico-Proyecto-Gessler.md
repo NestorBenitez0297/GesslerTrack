@@ -1,4 +1,4 @@
-> Versión en Markdown del informe técnico. La versión de entrega es [Informe-tecnico-Proyecto-Gessler.pdf](Informe-tecnico-Proyecto-Gessler.pdf), generada a partir del [DOCX](Informe-tecnico-Proyecto-Gessler.docx).
+> Versión en Markdown del informe técnico. La versión de entrega es [Informe técnico - Proyecto Gessler.pdf](Informe%20t%C3%A9cnico%20-%20Proyecto%20Gessler.pdf), generada a partir del [DOCX](Informe-tecnico-Proyecto-Gessler.docx).
 
 **UNIVERSIDAD IBEROAMERICANA**
 
